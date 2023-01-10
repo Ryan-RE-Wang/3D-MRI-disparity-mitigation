@@ -73,19 +73,26 @@ def load_img(file_path):
     data = nib.load(file_path)
     data = np.array(data.dataobj)
     return data
+    
+def transformation(img, rand):
+    
+    img_np = np.copy(img)
+    
+    if (rand == 0):
+        img_np = rotation(img_np)
+    elif (rand == 1):
+        img_np = shear(img_np)
+    elif (rand == 2):
+        img_np = scale(img_np)
+    else:
+        img_np = fish(img_np)
+    
+    return img_np
 
-def plot(img):
-    for i in range(img.shape[0]):
-        plt.subplot(16, 16, i+1)
-        fig = plt.imshow(img[i, :, :])
-
-        fig.axes.get_xaxis().set_visible(False)
-        fig.axes.get_yaxis().set_visible(False)
-
-        plt.gcf().set_size_inches(15,15)
-    plt.show()
-
-def shear(img, coef):
+def shear(img):
+    
+    coef = 6
+    
     img_np = np.copy(img)
         
     seed = np.random.uniform(-np.pi/coef, np.pi/coef)
@@ -103,7 +110,10 @@ def shear(img, coef):
     
     return img_np
 
-def scale(img, coef):
+def scale(img):
+    
+    coef = 0.8
+    
     img_np = np.copy(img)
     
     seed = np.random.uniform(coef, 1)
@@ -119,11 +129,14 @@ def scale(img, coef):
     
     return img_np
 
-def rotation(img, coef):
+def rotation(img):
+    
+    coef = 10
+    
     img_np = np.copy(img)
     
     angle = np.random.uniform(-coef, coef)
-    
+        
     for i in range(img.shape[0]):
             img_np[i, :, :] = rotation_transformation(angle, img_np[i, :, :])
 
@@ -194,12 +207,14 @@ def get_fish_zn_xn_yn(source_z, source_x, source_y, radius, distortion):
     return source_z / (1 - (distortion*(radius**2))), source_x / (1 - (distortion*(radius**2))), source_y / (1 - (distortion*(radius**2)))
 
 
-def fish(img, distortion_coefficient):
+def fish(img):
     """
     :type img: numpy.ndarray
     :param distortion_coefficient: The amount of distortion to apply.
     :return: numpy.ndarray - the image with applied effect.
     """
+    
+    distortion_coefficient = 0.4
 
     # prepare array for dst image
     dstimg = np.zeros_like(img)

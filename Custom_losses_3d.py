@@ -118,57 +118,17 @@ def fairALM_loss(y_test, y_preds, demo, lag_mult, group, val):
             lag_increments.append(eta * (grp_val - all_val))
             
     if not (val):      
-        lag_mult += lag_increments
+        lag_mult += torch.tensor(lag_increments)
 
     return bce_loss, penalty*100, lag_mult
 
-def get_onehot(label, task):
-    
-    labels = []
-    
-    for i in label:
-        if (task == 'race'):
-
-            if (i == 0):
-                labels.append([1, 0, 0])
-            elif (i == 1):
-                labels.append([0, 1, 0])
-            else:
-                labels.append([0, 0, 1])
-
-        elif (task == 'age'):
-
-            if (i == 0):
-                labels.append([1, 0, 0, 0])
-            elif (i == 1):
-                labels.append([0, 1, 0, 0])
-            elif (i == 2):
-                labels.append([0, 0, 1, 0])
-            else:
-                labels.append([0, 0, 0, 1])
-
-        elif (task == 'gender'):
-
-            if (i == 0):
-                labels.append([1, 0])
-            else:
-                labels.append([0, 1])
-            
-    return np.array(labels)
 
 def reciprocal_CCE_loss(y_test, y_preds):
     
     y_test = y_test.cpu()
     y_preds = y_preds.cpu()
-    
-    if (y_preds.shape[1] == 3):
-        y_test = get_onehot(y_test, 'race')
-    elif (y_preds.shape[1] == 2):
-        y_test = get_onehot(y_test, 'gender')
-    else:
-        y_test = get_onehot(y_test, 'age')
         
-    cce = nn.CrossEntropyLoss()
+    cce = nn.CrossEntropyLoss(reduction='none')
     return 1 / (cce(y_test, y_preds) * 0.01)
 
 def ERM_Loss(y_test, y_preds):
